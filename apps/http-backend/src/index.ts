@@ -5,8 +5,10 @@ import { JWT_SECRET } from "@repo/backend-common/config";
 import { CreateRoomSchema, CreateUserSchema, SignInSchema } from "@repo/common/types";
 import { prismaClient } from "@repo/db/client";
 import bcrypt from "bcrypt";
+import cors from "cors";
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 
 app.get("/", (req, res) => {
