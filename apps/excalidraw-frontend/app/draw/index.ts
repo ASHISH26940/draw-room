@@ -1,5 +1,4 @@
-import { HTTP_BACKEND } from '@/config';
-import axios from 'axios';
+import {getExistingShapes} from "./http"
 type Shape={
     type:"rect",
     x:number,
@@ -11,6 +10,12 @@ type Shape={
     centerX:number,
     centerY:number,
     radius:number,
+}|{
+    type:"pencil",
+    startX:number,
+    startY:number,
+    endX:number,
+    endY:number
 }
 export default async function drawInit(canvas:HTMLCanvasElement,roomId:string,socket:WebSocket){
     
@@ -82,15 +87,3 @@ function clearCanvas(existingShapes:Shape[],canvas:HTMLCanvasElement,ctx:CanvasR
     })
 }
 
-async function getExistingShapes(roomId:string){
-    const res=await axios.get(`${HTTP_BACKEND}/chats/${roomId}`);
-    if(!res)return;
-    const data=res.data.messages;
-    if(!data)return;
-    const shapes=data.map((message:{message:string})=>{
-        const messageData=JSON.parse(message.message);
-        return messageData;
-    });
-    if(!shapes)return
-    return shapes;
-}
