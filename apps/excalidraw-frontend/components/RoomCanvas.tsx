@@ -6,8 +6,10 @@ export default function RoomCanvas({roomId}:{roomId:string}){
     const canvasRef=useRef<HTMLCanvasElement>(null);
     const [socket,setSocket]=useState<WebSocket|null>(null);
     if(!canvasRef)return;
+    const token=localStorage.getItem("token");
+    if(!token)return;
     useEffect(()=>{
-        const ws=new WebSocket(`${WS_URL}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5MGZjYzViYS1jYzJlLTRjZDQtOTcxOS1kY2MyZGY4N2IyYmUiLCJpYXQiOjE3NDA0MDcxMjF9.DXSxjV27ptjdubM1ZYWTmP3UG9tHZBegER5MiSJYZXw`);
+        const ws=new WebSocket(`${WS_URL}?token=${token}`);
         ws.onopen=()=>{
             setSocket(ws);
             ws.send(JSON.stringify({
