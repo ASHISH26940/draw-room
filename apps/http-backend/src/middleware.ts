@@ -5,6 +5,8 @@ import { JWT_SECRET } from '@repo/backend-common/config';
 export async function middleware(req: Request, res: Response, next: NextFunction) {
     try {
        const token=req.headers["authorization"] ?? "";
+       console.log("Token:", token);
+       
        if(!JWT_SECRET){
         return;
        }

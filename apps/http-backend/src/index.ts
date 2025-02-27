@@ -112,7 +112,19 @@ app.post("/room", middleware, async (req: Request, res: Response) => {
             return;
         }
         const userId = req.userId;
-        const room = await prismaClient.room.create({
+        let room = await prismaClient.room.findUnique({
+            where: { slug: parsedData.data.name }
+        });
+
+        if (room) {
+            res.status(200).send({
+                message: "Room already exists",
+                roomId: room.id,
+                room: room
+            });
+            return;
+        }
+        room = await prismaClient.room.create({
             data: {
                 slug: parsedData.data.name,
                 adminId: userId
