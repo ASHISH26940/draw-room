@@ -1,23 +1,24 @@
-name: Deploy the backend
+name: Deploy Backend to AWS EC2
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout the code
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Docker login
+      - name: Docker Login
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -25,18 +26,14 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ github.sha }}
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: SSH into AWS EC2 & Deploy Container
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: ec2-user
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
+      - name: Deploy to AWS EC2
+        run: |
+          echo "${{ secrets.AWS_SSH_PRIVATE_KEY }}" > ~/aws_key.pem
+          chmod 600 ~/aws_key.pem
+          
+          ssh -o StrictHostKeyChecking=no -i ~/aws_key.pem ${{ secrets.AWS_USER }}@${{ secrets.AWS_HOST }} << 'EOF'
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ github.sha }}
             docker stop backend || true
             docker rm backend || true
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ github.sha }}
-            docker run -d --name backend -p 80:3000 ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ github.sha }}
+            docker run --name backend -d -p 8080:8080 ${{ secrets.DOCKERHUB_USERNAME }}/backend:${{ github.sha }}
+          EOF
