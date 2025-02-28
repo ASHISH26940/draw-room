@@ -1,30 +1,29 @@
-# Use an official PNPM image
-FROM octoblu/pnpm:latest
+# Use an official Bun image
+FROM oven/bun:latest
 
 # Set working directory
 WORKDIR /usr/src/app
 
 ARG DATABASE_URL
 
-# Copy lockfiles and Turbo config first for better caching
-COPY pnpm-lock.yaml package.json turbo.json ./
-
+# Copy package manager files first for better caching
+COPY bun.lockb package.json turbo.json ./
 
 # Copy packages and apps
 COPY packages ./packages
 COPY apps/http-backend ./apps/http-backend
 
+# Install dependencies efficiently with Bun
+RUN bun install --frozen-lockfile
 
-# Install dependencies efficiently
-RUN pnpm install --frozen-lockfile
-
-RUN pnpm run db:migrate
+# Run database migrations
+RUN bun run db:migrate
 
 # Build the application
-RUN pnpm run build
+RUN bun run build
 
 # Expose the application port
 EXPOSE 3001
 
-# Run database migrations before starting (inside CMD)
-CMD ["pnpm", "start:backend"]
+# Run database migrations before starting the app
+CMD ["bun", "run", "start:http"]

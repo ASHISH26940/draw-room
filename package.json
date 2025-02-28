@@ -7,7 +7,7 @@
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "db:migrate":"cd packages/db && npx prisma generate && cd ../..",
-    "start:http":"cd apps/http-backend && pnpm start",
+    "start:http":"cd apps/http-backend && bun run index.ts",
     "start:ws":"cd apps/ws-backend && pnpm start",
     "start:web":"cd apps/excalidraw-frontend && pnpm start"
   },
